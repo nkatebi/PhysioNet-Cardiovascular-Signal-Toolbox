@@ -96,36 +96,41 @@ xlabel('window index')
 ylabel('Heart Rate (bpm) ')
 title('Heart rate variability using ecg signal')
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% line up the beats %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% extracting the beats by dividing the signal in a location of half of RR intervals
-beatlocation=round((r_peaks(1:end-1)+r_peaks(2:end))/2);
-%qrslocation is the location of r peak in each beat 
+beatlocation=round((r_peaks(1:end-1)+r_peaks(2:end))/2); % extracting the beats by dividing the signal using the middle of RR intervals
+
 qrslocation=nan(1,(numel(beatlocation)-1));
 
 for i=1:numel(beatlocation)-1
 beat{1,i}=(ecg(beatlocation(i):beatlocation(i+1))); %saving beats in a cell
-qrslocation(1,i)=r_peaks(i+1)-beatlocation(i);
+
+qrslocation(1,i)=r_peaks(i+1)-beatlocation(i);%qrslocation is the location of r peak in each beat 
+
 end
 
 beatlength=beatlocation(2:end)-beatlocation(1:end-1);
-lengthofarray=2*max(beatlength); 
-alignedbeat=nan(length(beat),round(lengthofarray)); % alignedarray is a (number of beats)x(lengthofarray) dimension matrix which we created to align the beats based on qrs locations
-qrs=lengthofarray/2; % beats will be aligned based on this location for qrs       
+
+lengthofarray=2*max(beatlength); %length of array is a number of columns of alignedbeat matrix and it is equal to 2*max(beatlength) 
+                                 %so we can move each beat to line them up based on qrs location
+                                 
+                                 
+alignedbeat=nan(length(beat),round(lengthofarray)); 
+                                                    
+                                                    
+                                                                                                    
+qrs=lengthofarray/2; % beats will be aligned based on this location for qrs 
+
 for i=1:length(beat)
-  
+          % alignedbeat is a (number of beats)x(lengthofarray) dimension matrix 
+          %which we created to align the beats based on qrs locations
     alignedbeat(i,((qrs-qrslocation(i)+1):qrs))=beat{1,i}(1:qrslocation(i));
     alignedbeat(i,((qrs:qrs+(length(beat{1,i})-qrslocation(i)))))=beat{1,i}(qrslocation(i):end);
     
 end
 figure(3)
-hold on
-for i=1:length(beat)
-    signal=alignedbeat(i,:);
-     plot(signal)  
-end
+plot(alignedbeat')  
 title('lined up beats')
 xlabel('sample')
 ylabel('mV')
-
 
 
 
